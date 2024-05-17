@@ -22,5 +22,10 @@ Powered by Win32 API and tkinter, WinToucher is a Python application that allows
 - 👂 Global, togglable keyboard listener
 - 👻 Hide window to the system tray
 
+## To-do
+- [ ] Fix bugs with touch simulation when calling `InjectTouchInput` in some certain cases
+- [ ] Improve overlay GUI
+- [ ] Try to build with `nuitka`
+
 ## License
 [MIT](./LICENSE)
