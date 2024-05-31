@@ -11,6 +11,8 @@ pynput = "^1.7.6"
 pywin32 = "^306"
 pystray = "^0.19.5"
 
+[tool.poetry.scripts]
+wintoucher = "wintoucher.__main__:main"
 
 [tool.poetry.group.dev.dependencies]
 types-pywin32 = "^306.0.0.20240408"

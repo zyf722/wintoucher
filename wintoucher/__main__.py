@@ -742,7 +742,9 @@ class Overlay(tk.Toplevel):
         for dot in self.dots:
             dot.draw(self.canvas, outlined=dot == self.dots.current_viewed_dot)
 
-
-if __name__ == "__main__":
+def main():
     app = App(dots=Dots())
     app.run()
+
+if __name__ == "__main__":
+    main()
