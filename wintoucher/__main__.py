@@ -9,13 +9,14 @@ from json import JSONDecoder, JSONEncoder
 from math import cos, radians, sin
 from threading import Thread
 from tkinter import filedialog, messagebox, ttk
-from typing import Any, Callable, ClassVar, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, ClassVar, Dict, Iterable, List, Optional, Type
 
 from pynput.keyboard import Key as SpecialKey
 from pynput.keyboard import KeyCode, Listener
 
 from wintoucher.json import JSONSerializableManager
-from wintoucher.tkutils import (
+from wintoucher.touch import MAX_TOUCHES, TouchError, TouchManager
+from wintoucher.utils.gui import (
     WITHDRAWN,
     DetailDict,
     TrayIcon,
@@ -25,78 +26,7 @@ from wintoucher.tkutils import (
     grid_widget,
     toggle_state,
 )
-from wintoucher.touch import MAX_TOUCHES, TouchError, TouchManager
-
-Key = Union[KeyCode, SpecialKey]
-
-
-class KeyIcon:
-    __KEY_TO_STR = {
-        SpecialKey.alt_l: "L Alt",
-        SpecialKey.alt_r: "R Alt",
-        SpecialKey.alt_gr: "Alt Gr",
-        SpecialKey.backspace: "Backspace",
-        SpecialKey.caps_lock: "Caps Lock",
-        SpecialKey.delete: "Delete",
-        SpecialKey.down: "Down",
-        SpecialKey.end: "End",
-        SpecialKey.enter: "Enter",
-        SpecialKey.esc: "Esc",
-        SpecialKey.f1: "F1",
-        SpecialKey.f2: "F2",
-        SpecialKey.f3: "F3",
-        SpecialKey.f4: "F4",
-        SpecialKey.f5: "F5",
-        SpecialKey.f6: "F6",
-        SpecialKey.f7: "F7",
-        SpecialKey.f8: "F8",
-        SpecialKey.f9: "F9",
-        SpecialKey.f10: "F10",
-        SpecialKey.f11: "F11",
-        SpecialKey.f12: "F12",
-        SpecialKey.f13: "F13",
-        SpecialKey.f14: "F14",
-        SpecialKey.f15: "F15",
-        SpecialKey.f16: "F16",
-        SpecialKey.f17: "F17",
-        SpecialKey.f18: "F18",
-        SpecialKey.f19: "F19",
-        SpecialKey.f20: "F20",
-        SpecialKey.home: "Home",
-        SpecialKey.left: "Left",
-        SpecialKey.page_down: "Page Down",
-        SpecialKey.page_up: "Page Up",
-        SpecialKey.right: "Right",
-        SpecialKey.shift_l: "L Shift",
-        SpecialKey.shift_r: "R Shift",
-        SpecialKey.space: "Space",
-        SpecialKey.tab: "Tab",
-        SpecialKey.up: "Up",
-        SpecialKey.insert: "Insert",
-        SpecialKey.menu: "Menu",
-        SpecialKey.num_lock: "Num Lock",
-        SpecialKey.pause: "Pause",
-        SpecialKey.print_screen: "Print Screen",
-        SpecialKey.scroll_lock: "Scroll Lock",
-    }
-
-    @classmethod
-    def is_valid_key(cls, key: Key):
-        return cls.is_special_key(key) or (isinstance(key, KeyCode) and key.char)
-
-    @classmethod
-    def is_special_key(cls, key: Key):
-        return key in cls.__KEY_TO_STR
-
-    @classmethod
-    def to_str(cls, key: Optional[Key]) -> str:
-        if key is None:
-            return ""
-        elif isinstance(key, SpecialKey):
-            return cls.__KEY_TO_STR[key]
-        elif isinstance(key, KeyCode):
-            assert key.char is not None
-            return key.char
+from wintoucher.utils.key import Key, is_special_key, is_valid_key, key_to_str
 
 
 @dataclass
@@ -131,7 +61,7 @@ class Dot(ABC):
             text = canvas.create_text(
                 self.x + self.KEY_LABEL_OFFSET_X,
                 self.y + self.KEY_LABEL_OFFSET_Y,
-                text=KeyIcon.to_str(self.key),
+                text=key_to_str(self.key),
                 fill="black",
             )
             text_bbox = canvas.bbox(text)
@@ -156,7 +86,7 @@ class Dot(ABC):
             },
             "Key": {
                 "widget_type": ttk.Label,
-                "params": {"text": KeyIcon.to_str(self.key)},
+                "params": {"text": key_to_str(self.key)},
             },
         }
 
@@ -577,7 +507,7 @@ class App:
     def keyboard_handlers(self):
         def prehandler(func: Callable[[Key], None]):
             def wrapped(key: Key, *args, **kwargs):
-                if not KeyIcon.is_special_key(key):
+                if not is_special_key(key):
                     key = self.keyboard.canonical(key)
 
                 if self.keyboard_listening:
@@ -593,7 +523,7 @@ class App:
 
             if self.overlay.state() == WITHDRAWN:
                 # Inject touch
-                if self.keyboard_listening and KeyIcon.is_valid_key(key):
+                if self.keyboard_listening and is_valid_key(key):
                     for dot in self.dots.get_dots_by_key(key):
                         if isinstance(dot, PressDot):
                             self.touch_manager.press(dot.id, dot.x, dot.y)
@@ -607,7 +537,7 @@ class App:
                     self.touch_manager.up(dot.id)
             else:
                 # Assign key to dot
-                if self.dots and KeyIcon.is_valid_key(key):
+                if self.dots and is_valid_key(key):
                     for dot in (
                         self.dots.current_viewed_dot,
                         self.dots.last_operated_dot,
@@ -742,9 +672,11 @@ class Overlay(tk.Toplevel):
         for dot in self.dots:
             dot.draw(self.canvas, outlined=dot == self.dots.current_viewed_dot)
 
+
 def main():
     app = App(dots=Dots())
     app.run()
+
 
 if __name__ == "__main__":
     main()

@@ -13,7 +13,7 @@ from ctypes import (
 from ctypes.wintypes import DWORD, HANDLE, HWND, POINT, RECT
 from dataclasses import dataclass, field, fields
 from threading import Lock
-from typing import List
+from typing import ClassVar, List, Type
 
 # Constants
 # For init
@@ -57,9 +57,22 @@ POINTER_FLAG_WHEEL = 0x00080000
 POINTER_FLAG_HWHEEL = 0x00100000
 POINTER_FLAG_CAPTURECHANGED = 0x00200000
 
+# Default values
+MAX_TOUCHES = 256
+FINGER_RADIUS = 20
+ORIENTATION = 90
+PRESSURE = 32000
+DELAY = 0.05
 
-# Decorator to generate _fields_ attribute for dataclasses
-def structure(cls):
+
+def structure(cls: Type):
+    """
+    Decorator to generate `_fields_` attribute for dataclasses.
+
+    Args:
+        cls (Type): Class to decorate. Should be a dataclass and inherit from `ctypes.Structure`.
+    """
+
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join(f'{field.name}={getattr(self, field.name)!r}' for field in fields(self))})"
 
@@ -72,6 +85,13 @@ def structure(cls):
 @structure
 @dataclass
 class POINTER_INFO(Structure):
+    """
+    Object for C struct `POINTER_INFO`.
+
+    See:
+        https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-pointer_info
+    """
+
     pointerType: c_uint32 = field(default_factory=c_uint32)
     pointerId: c_uint32 = field(default_factory=c_uint32)
     frameId: c_uint32 = field(default_factory=c_uint32)
@@ -93,6 +113,13 @@ class POINTER_INFO(Structure):
 @structure
 @dataclass
 class POINTER_TOUCH_INFO(Structure):
+    """
+    Object for C struct `POINTER_TOUCH_INFO`.
+
+    See:
+        https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-pointer_touch_info
+    """
+
     pointerInfo: POINTER_INFO = field(default_factory=POINTER_INFO)
     touchFlags: c_int = field(default_factory=c_int)
     touchMask: c_int = field(default_factory=c_int)
@@ -102,26 +129,32 @@ class POINTER_TOUCH_INFO(Structure):
     pressure: c_uint32 = field(default_factory=c_uint32)
 
 
-MAX_TOUCHES = 256
-FINGER_RADIUS = 20
-ORIENTATION = 90
-PRESSURE = 32000
-DELAY = 0.05
-
-
 class TouchError(Exception):
+    """
+    Exception for touch errors.
+    """
+
     pass
 
 
+@dataclass
 class TouchItem:
+    """
+    Class to represent a touch item. Should be managed by a `TouchManager`.
+    """
+
     touch_info: POINTER_TOUCH_INFO
     x: int
     y: int
     enabled: bool
 
-    DOWN_STATE = POINTER_FLAG_DOWN | POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT
+    DOWN_STATE: ClassVar[int] = (
+        POINTER_FLAG_DOWN | POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT
+    )
 
-    UPDATE_STATE = POINTER_FLAG_UPDATE | POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT
+    UPDATE_STATE: ClassVar[int] = (
+        POINTER_FLAG_UPDATE | POINTER_FLAG_INRANGE | POINTER_FLAG_INCONTACT
+    )
 
     def __init__(self, id: int):
         self.x = 0
@@ -140,6 +173,13 @@ class TouchItem:
         )
 
     def __set_touch_point(self, x: int, y: int):
+        """
+        Internal method to set the touch point to the given coordinates.
+
+        Args:
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
         self.touch_info.pointerInfo.ptPixelLocation.x = x
         self.touch_info.pointerInfo.ptPixelLocation.y = y
 
@@ -152,27 +192,51 @@ class TouchItem:
         self.y = y
 
     def down(self, x: int, y: int):
+        """
+        Set the touch point to the given coordinates and set the touch state to down.
+
+        Args:
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
         self.__set_touch_point(x, y)
-        self.touch_info.pointerInfo.pointerFlags = c_int(self.DOWN_STATE)
+        self.touch_info.pointerInfo.pointerFlags = c_int(TouchItem.DOWN_STATE)
         self.enabled = True
 
     def move(self, x: int, y: int):
+        """
+        Move a touch point which is already down to the given coordinates.
+
+        Args:
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
         self.__set_touch_point(x, y)
-        self.touch_info.pointerInfo.pointerFlags = c_int(self.UPDATE_STATE)
+        self.touch_info.pointerInfo.pointerFlags = c_int(TouchItem.UPDATE_STATE)
 
     def up(self):
+        """
+        Set the touch state to up.
+        """
         self.__set_touch_point(self.x, self.y)
         self.touch_info.pointerInfo.pointerFlags = c_int(POINTER_FLAG_UP)
 
     def update(self):
+        """
+        Update the touch state to the next state.
+        """
         p_info = self.touch_info.pointerInfo
-        if p_info.pointerFlags == self.DOWN_STATE:
-            p_info.pointerFlags = c_int(self.UPDATE_STATE)
+        if p_info.pointerFlags == TouchItem.DOWN_STATE:
+            p_info.pointerFlags = c_int(TouchItem.UPDATE_STATE)
         elif p_info.pointerFlags == POINTER_FLAG_UP:
             self.enabled = False
 
 
 class TouchManager:
+    """
+    Class to manage touch points.
+    """
+
     touches: List[TouchItem]
     touch_infos: Array
     lock: Lock
@@ -197,6 +261,15 @@ class TouchManager:
             raise TouchError("Failed to initialize touch injection.")
 
     def down(self, id: int, x: int, y: int):
+        """
+        Set a touch point to the given coordinates and set the touch state to down.
+
+        Args:
+            id (int): Touch point ID.
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
+
         if id >= len(self.touches):
             raise TouchError("Touch ID out of range.")
 
@@ -204,6 +277,15 @@ class TouchManager:
             self.touches[id].down(x, y)
 
     def move(self, id: int, x: int, y: int):
+        """
+        Move a touch point which is already down to the given coordinates.
+
+        Args:
+            id (int): Touch point ID.
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
+
         if id >= len(self.touches):
             raise TouchError("Touch ID out of range.")
 
@@ -211,6 +293,15 @@ class TouchManager:
             self.touches[id].move(x, y)
 
     def press(self, id: int, x: int, y: int):
+        """
+        Higher wrapper for `down` and `move`.
+
+        Args:
+            id (int): Touch point ID.
+            x (int): X coordinate.
+            y (int): Y coordinate.
+        """
+
         if id >= len(self.touches):
             raise TouchError("Touch ID out of range.")
 
@@ -221,6 +312,13 @@ class TouchManager:
             touch.down(x, y)
 
     def up(self, id: int):
+        """
+        Set a touch point to up.
+
+        Args:
+            id (int): Touch point ID.
+        """
+
         if id >= len(self.touches):
             raise TouchError("Touch ID out of range.")
 
@@ -228,6 +326,10 @@ class TouchManager:
             self.touches[id].up()
 
     def apply_touches(self):
+        """
+        Apply all touch points to OS.
+        """
+
         with self.lock:
             touches: List[TouchItem] = []
 
@@ -254,27 +356,6 @@ class TouchManager:
 
 
 if __name__ == "__main__":
-    # manager = TouchManager(2)
-
-    # manager.down(0, x=960, y=640)
-    # manager.down(1, x=950, y=540)
-    # manager.apply_touches()
-
-    # time.sleep(0.05)
-
-    # for i in range(100):
-    #     print(i)
-    #     manager.move(0, x=960 + i, y=640)
-    #     manager.move(1, x=950 + i, y=540)
-    #     manager.apply_touches()
-    #     time.sleep(0.005)
-
-    # time.sleep(0.05)
-
-    # manager.up(0)
-    # manager.up(1)
-    # manager.apply_touches()
-
     manager = TouchManager(1)
 
     manager.down(0, x=960, y=640)

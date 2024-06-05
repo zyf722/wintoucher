@@ -71,7 +71,7 @@ class JSONSerializableManager:
     """
     Manager for types that should be serialized by builtin json module.
 
-    Registers and unregisters types and builds custom JSONEncoder and JSONDecoder classes.
+    Registers and unregisters types and builds custom `JSONEncoder` and `JSONDecoder` classes.
 
     Example:
     >>> manager = JSONSerializableManager()
@@ -153,7 +153,7 @@ class JSONSerializableManager:
 
     def build_encoder(self) -> Type[JSONEncoder]:
         """
-        Build a custom JSONEncoder class that can serialize registered JSONSerializable types.
+        Build a custom `JSONEncoder` class that can serialize registered `JSONSerializable` types.
 
         Returns:
             Type[JSONEncoder]: Custom JSONEncoder class.
@@ -180,7 +180,7 @@ class JSONSerializableManager:
 
     def build_decoder(self) -> Type[JSONDecoder]:
         """
-        Build a custom JSONDecoder class that can deserialize registered JSONSerializable types.
+        Build a custom `JSONDecoder` class that can deserialize registered `JSONSerializable` types.
 
         Returns:
             Type[JSONDecoder]: Custom JSONDecoder class.
