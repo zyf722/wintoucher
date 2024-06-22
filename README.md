@@ -5,7 +5,7 @@
 <img src="assets/WinToucher.svg" width="150" align="right">
 
 # WinToucher
-Powered by Win32 API and tkinter, WinToucher is a Python application that allows you to simulate touch events on Windows through keyboard input. It is useful for testing touch-based applications on Windows without the need for a physical touch screen.
+Powered by Win32 API and tkinter, WinToucher is a Python application that allows you to simulate touch events on Windows through keyboard input. It is useful for testing touch-based applications on Windows without a physical touch screen.
 
 ![](./assets/Preview.png)
 
@@ -36,8 +36,8 @@ poetry run wintoucher
 ```
 
 ## To-do
-- [ ] Further modularize the code and decouple current `__main__.py`
-- [ ] Fix bugs with touch simulation when calling `InjectTouchInput` in some certain cases
+- [x] Further modularize the code and decouple current `__main__.py`
+- [x] Fix bugs with touch simulation when calling `InjectTouchInput` in some certain cases
 - [ ] Improve overlay GUI
 - [ ] Try to build with `nuitka`
 
