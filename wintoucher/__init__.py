@@ -41,11 +41,14 @@ class WintoucherApp:
     APP_WIDTH = 450
     APP_HEIGHT = 375
     APP_NAME = "WinToucher"
+    APP_VERSION = "v0.1.0"
     APP_ICO_NAME = "WinToucher.ico"
 
     def __init__(self, dots: Dots):
+        APP_NAME_WITH_VERSION = f"{self.APP_NAME} {self.APP_VERSION}"
+
         self.root = tk.Tk()
-        self.root.title(f"{self.APP_NAME} - Control Panel")
+        self.root.title(f"Control Panel - {APP_NAME_WITH_VERSION}")
 
         self.root.geometry(f"{self.APP_WIDTH}x{self.APP_HEIGHT}")
         self.root.maxsize(self.APP_WIDTH, self.APP_HEIGHT)
@@ -57,7 +60,13 @@ class WintoucherApp:
         self.root.bind("<Unmap>", self.minimize)
 
         self.dots = dots
-        self.overlay = Overlay(self.root, self.dots, self.update_dot_detail)
+        self.overlay = Overlay(
+            master=self.root,
+            app_name=APP_NAME_WITH_VERSION,
+            app_icon=self.APP_ICO_NAME,
+            dots=self.dots,
+            update_dot_detail=self.update_dot_detail,
+        )
         self.keyboard = Listener(**self.keyboard_handlers())
         self.keyboard.start()
         self.keyboard_listening = False
@@ -154,7 +163,7 @@ class WintoucherApp:
 
         # Tray Icon
         self.root.protocol("WM_DELETE_WINDOW", self.hide_to_tray)
-        self.tray_icon = TrayIcon(self.APP_NAME, self.APP_ICO_NAME)
+        self.tray_icon = TrayIcon(APP_NAME_WITH_VERSION, self.APP_ICO_NAME)
         self.tray_icon.menu_builder.add_item(
             "Show Control Panel",
             lambda icon, item: self.show_from_tray(),

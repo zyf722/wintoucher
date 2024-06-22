@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wintoucher"
-version = "0.1.0"
+version = "v0.1.0"
 description = "Powered by Win32 API and tkinter, WinToucher is a Python application that allows you to simulate touch events on Windows through keyboard input."
 license = "MIT"
 authors = ["MaxMixAlex <MaxMixAlex@protonmail.com>"]

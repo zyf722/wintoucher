@@ -16,10 +16,20 @@ class Overlay(tk.Toplevel):
     update_current_dot_detail: UpdateDotCallable
     showing: bool
 
-    def __init__(self, master: tk.Tk, dots: Dots, update_dot_detail: UpdateDotCallable):
+    def __init__(
+        self,
+        master: tk.Tk,
+        app_name: str,
+        app_icon: str,
+        dots: Dots,
+        update_dot_detail: UpdateDotCallable,
+    ):
         super().__init__(master)
         self.attributes("-fullscreen", True)
         self.attributes("-alpha", 0.5)
+        self.title(f"Overlay - {app_name}")
+        self.iconbitmap(app_icon)
+
         self.canvas = tk.Canvas(self, bg="black", highlightthickness=0)
         self.canvas.pack(fill=tk.BOTH, expand=True)
         self.dots = dots
