@@ -77,7 +77,7 @@ def structure(cls: Type):
         return f"{self.__class__.__name__}({', '.join(f'{field.name}={getattr(self, field.name)!r}' for field in fields(self))})"
 
     cls._fields_ = [(field.name, field.type) for field in fields(cls)]
-    cls.__repr__ = __repr__
+    cls.__repr__ = __repr__  # type: ignore
     return cls
 
 
