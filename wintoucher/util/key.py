@@ -65,6 +65,7 @@ def is_special_key(key: Key):
     Returns:
         bool: `True` if the key is a special key, `False` otherwise.
     """
+
     return key in __SPECIAL_KEYS
 
 
@@ -78,6 +79,7 @@ def is_valid_key(key: Key):
     Returns:
         bool: `True` if the key is a valid key, `False` otherwise.
     """
+
     return is_special_key(key) or (isinstance(key, KeyCode) and key.char is not None)
 
 
@@ -91,6 +93,7 @@ def key_to_str(key: Optional[Key]) -> str:
     Returns:
         str: The string representation of the key.
     """
+
     if key is None:
         return ""
     elif isinstance(key, SpecialKey):

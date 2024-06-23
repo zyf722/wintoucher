@@ -15,6 +15,10 @@ from wintoucher.util.touch import TouchManager
 
 @dataclass
 class DotView(ABC):
+    """
+    A view class for a dot.
+    """
+
     dot: Dot
 
     COLOR: ClassVar[str] = "red"
@@ -27,6 +31,14 @@ class DotView(ABC):
         return self.COLOR if self.dot.key else "snow4"
 
     def draw(self, canvas: tk.Canvas, outlined: bool):
+        """
+        Draw the dot on the canvas.
+
+        Args:
+            canvas (tk.Canvas): The canvas to draw the dot on.
+            outlined (bool): Whether to outline the dot.
+        """
+
         # Create dot
         canvas.create_oval(
             self.dot.x - self.RADIUS,
@@ -60,6 +72,16 @@ class DotView(ABC):
             canvas.tag_lower(rect, text)
 
     def detail(self, draw_dots: Callable[[], None]) -> DetailDict:
+        """
+        Get the detail view for the dot.
+
+        Args:
+            draw_dots (Callable[[], None]): A callback function to redraw the dots.
+
+        Returns:
+            DetailDict: The detail view for the dot.
+        """
+
         return {
             "Type": {
                 "widget_type": ttk.Label,
@@ -74,11 +96,19 @@ class DotView(ABC):
 
 @dataclass
 class PressDotView(DotView):
+    """
+    A view class for a PressDot.
+    """
+
     COLOR: ClassVar[str] = "green"
 
 
 @dataclass
 class FlickDotView(DotView):
+    """
+    A view class for a FlickDot.
+    """
+
     dot: FlickDot
     COLOR: ClassVar[str] = "orange"
     KEY_LABEL_OFFSET_Y: ClassVar[int] = 40
@@ -153,6 +183,10 @@ class FlickDotView(DotView):
         }
 
     def run(self, touch_manager: TouchManager):
+        """
+        Run the flick. This will simulate a flick on the screen.
+        """
+
         if not self.running:
 
             def runner():
@@ -183,4 +217,8 @@ class FlickDotView(DotView):
             thread.start()
 
     def stop(self):
+        """
+        Stop the flick.
+        """
+
         self.running = False

@@ -8,6 +8,10 @@ from wintoucher.util.key import Key
 
 @dataclass
 class Dot(ABC):
+    """
+    Data class representing a touch dot on the screen.
+    """
+
     id: int
     x: int
     y: int
@@ -20,11 +24,19 @@ class Dot(ABC):
 
 @dataclass
 class PressDot(Dot):
+    """
+    A touch dot that represents a press.
+    """
+
     pass
 
 
 @dataclass
 class FlickDot(Dot):
+    """
+    A touch dot that represents a flick.
+    """
+
     angle: tk.IntVar = field(default_factory=tk.IntVar)
     distance: tk.IntVar = field(default_factory=tk.IntVar)
     delay: float = 0.005

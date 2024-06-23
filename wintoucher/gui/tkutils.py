@@ -19,6 +19,7 @@ def create_frame(master: tk.Misc, title: str, padx=10, pady=10, cols=2):
     Returns:
         ttk.Labelframe: The created labelframe.
     """
+
     frame = ttk.Labelframe(master, text=title, padding=(padx, pady))
     for col in range(cols):
         frame.grid_columnconfigure(col, weight=1, minsize=360 // cols)
@@ -37,6 +38,7 @@ def create_button(master: tk.Misc, text: str, command: Callable):
     Returns:
         ttk.Button: The created button.
     """
+
     button = ttk.Button(
         master,
         text=text,
@@ -64,6 +66,7 @@ def grid_widget(
         padx (int, optional): The padding in the x direction. Defaults to `5`.
         pady (int, optional): The padding in the y direction. Defaults to `0`.
     """
+
     widget.grid(
         row=row,
         column=col,
@@ -96,6 +99,7 @@ def create_details(master: tk.Misc, details: DetailDict):
         master (tk.Misc): The parent widget.
         details (DetailDict): The details to show in the detail view.
     """
+
     for i, (label_str, widget_item) in enumerate(details.items()):
         label = ttk.Label(master, text=label_str)
         grid_widget(label, i, 0)
@@ -113,6 +117,7 @@ def is_frame(widget: tk.Widget):
     Returns:
         bool: `True` if the widget is a frame, `False` otherwise.
     """
+
     return isinstance(widget, (tk.Frame, tk.LabelFrame, ttk.Frame, ttk.Labelframe))
 
 
@@ -127,6 +132,7 @@ def toggle_widget(
         widget (tk.Widget): The widget to toggle the state of.
         state (Optional[Literal["normal", "disabled", "readonly"]], optional): The state to set the widget to. Defaults to `None`.
     """
+
     if state is None:
         state = getattr(widget, "old_state", "normal")
     setattr(widget, "old_state", widget["state"])
@@ -146,6 +152,7 @@ def toggle_state(
         widget (tk.Widget): The widget to toggle the state of.
         state (Optional[Literal["normal", "disabled", "readonly"]], optional): The state to set the widget to. Defaults to `None`.
     """
+
     if is_frame(widget):
         for child in widget.winfo_children():
             toggle_state(child, state)

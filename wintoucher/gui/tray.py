@@ -68,6 +68,7 @@ class TrayIcon:
                 visible (bool, optional): Whether the item is visible. Defaults to `True`.
                 enabled (bool, optional): Whether the item is enabled. Defaults to `True`.
             """
+
             self.menu_items.append(
                 MenuItem(
                     text,
@@ -87,6 +88,7 @@ class TrayIcon:
             Returns:
                 Menu: The built menu.
             """
+
             return Menu(*self.menu_items)
 
     def create_icon(self):
@@ -95,6 +97,7 @@ class TrayIcon:
 
         This will create the icon and start the icon thread.
         """
+
         self.icon = Icon(
             self.app_name,
             Image.open(self.icon_path),
@@ -110,6 +113,7 @@ class TrayIcon:
         """
         Stop the tray icon.
         """
+
         if self.icon is not None and self.thread is not None:
             self.icon.visible = False
             self.icon.stop()
@@ -121,5 +125,6 @@ class TrayIcon:
         Args:
             message (str): The message to show.
         """
+
         if self.icon is not None:
             self.icon.notify(message, title=self.app_name)

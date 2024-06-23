@@ -26,6 +26,9 @@ class TwoWayDict(Generic[K, V]):
         return self.kv[key]
 
     def get_key(self, value: V) -> K:
+        """
+        Get the key for the given value.
+        """
         return self.vk[value]
 
     def __delitem__(self, key: K):
@@ -109,16 +112,20 @@ class JSONSerializableManager:
         Args:
             cls (Type[JSONSerializable]): JSONSerializable type to register.
         """
+
         self.__register(cls, cls.__json__())
 
     def register_special(self, cls: Type[T], json_attrs: Tuple[str, ...]):
         """
         Register a type with a custom attribute signature.
 
+        This method should be used when the type is not accessible or cannot be modified.
+
         Args:
             cls (Type): JSONSerializable type to register.
             json_attrs (Tuple[str, ...]): Custom attribute signature.
         """
+
         self.__register(cls, json_attrs)
 
     def add_decoder(self, cls: Type[T], decoder: Callable[[Dict[str, Any]], T]):
@@ -129,6 +136,7 @@ class JSONSerializableManager:
             cls (Type[T]): Type to decode.
             decoder (Callable): Decoder function.
         """
+
         json_attr = self.types.get_key(cls)
         if json_attr in self.decoders:
             raise ValueError(
@@ -144,6 +152,7 @@ class JSONSerializableManager:
             cls (Type[T]): Type to encode.
             encoder (Callable): Encoder function.
         """
+
         json_attr = self.types.get_key(cls)
         if json_attr in self.encoders:
             raise ValueError(
@@ -187,6 +196,7 @@ class JSONSerializableManager:
         """
 
         def object_hook(o):
+            # Built-in collections will be handled
             if isinstance(o, dict):
                 key_tuple = tuple(o.keys())
                 if key_tuple in self.decoders:

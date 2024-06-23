@@ -180,6 +180,7 @@ class TouchItem:
             x (int): X coordinate.
             y (int): Y coordinate.
         """
+
         self.touch_info.pointerInfo.ptPixelLocation.x = x
         self.touch_info.pointerInfo.ptPixelLocation.y = y
 
@@ -199,6 +200,7 @@ class TouchItem:
             x (int): X coordinate.
             y (int): Y coordinate.
         """
+
         self.__set_touch_point(x, y)
         self.touch_info.pointerInfo.pointerFlags = c_int(TouchItem.DOWN_STATE)
         self.enabled = True
@@ -211,6 +213,7 @@ class TouchItem:
             x (int): X coordinate.
             y (int): Y coordinate.
         """
+
         self.__set_touch_point(x, y)
         self.touch_info.pointerInfo.pointerFlags = c_int(TouchItem.UPDATE_STATE)
 
@@ -218,6 +221,7 @@ class TouchItem:
         """
         Set the touch state to up.
         """
+
         self.__set_touch_point(self.x, self.y)
         self.touch_info.pointerInfo.pointerFlags = c_int(POINTER_FLAG_UP)
 
@@ -225,6 +229,7 @@ class TouchItem:
         """
         Update the touch state to the next state.
         """
+
         p_info = self.touch_info.pointerInfo
         if p_info.pointerFlags == TouchItem.DOWN_STATE:
             p_info.pointerFlags = c_int(TouchItem.UPDATE_STATE)

@@ -27,6 +27,12 @@ from wintoucher.util.touch import MAX_TOUCHES, TouchError, TouchManager
 
 
 class WintoucherApp:
+    """
+    Main class for the WinToucher application.
+
+    Also responsible for the main GUI of the control panel.
+    """
+
     overlay: "Overlay"
     dots: Dots
     tray_icon: TrayIcon
@@ -244,12 +250,11 @@ class WintoucherApp:
             self.overlay.update()
 
     def toggle_listen(self, notify: bool = False):
+        listen_text = "resume" if self.keyboard_listening else "pause"
         if notify:
-            self.tray_icon.notify(
-                f"Keyboard listening {'resume' if self.keyboard_listening else 'pause'}d."
-            )
+            self.tray_icon.notify(f"Keyboard listening {listen_text}d.")
         self.listen_button.config(
-            text=f"{'Resume' if self.keyboard_listening else 'Pause'} Listen (Esc)"
+            text=f"{listen_text[0].upper()}{listen_text[1:]} Listen (Esc)"
         )
 
         self.keyboard_listening = not self.keyboard_listening
